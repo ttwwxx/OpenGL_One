@@ -7,10 +7,12 @@
 in vec3 vertexPos;
 in vec3 worldPos;
 in vec3 Normal;
+in vec2 TexCoords;
 
 struct Material{
-	vec3 ambient;
-	vec3 diffuse;
+	//vec3 ambient;
+	//vec3 diffuse;
+	sampler2D diffuse;
 	vec3 specular;
 	float shininess;
 };
@@ -23,7 +25,7 @@ struct Light
 uniform Material material;
 uniform Light light;
 
-uniform vec3 emission;
+//uniform vec3 emission;
 uniform vec3 ambientColor;
 //uniform vec3 lightPos;
 //uniform vec3 lightColor;
@@ -33,8 +35,7 @@ uniform vec3 cameraPos;
 out vec4 FragColor;
 void main()
 {
-	//ambient
-	vec3 ambient = material.ambient * ambientColor ;
+
 	//计算方向
 	vec3 norm = normalize(Normal);
 	vec3 lightDir = normalize(light.Position - worldPos);
@@ -45,10 +46,9 @@ void main()
 	float spec =pow( max(dot(reflectDir, cameraDir),0), material.shininess);
 	vec3 specular = material.specular * spec * light.Color;
 	//diffuse
-	
-
-	vec3 diffuse = max( dot (lightDir, norm), 0.0f) * light.Color  * material.diffuse * emission;
-	
+	vec3 diffuse = texture(material.diffuse, TexCoords).rgb;
+		//ambient环境光
+	vec3 ambient = light.Color * ambientColor ;
 	vec3 final = ambient + diffuse + specular;
 	FragColor = vec4(final,1.0f);
 };

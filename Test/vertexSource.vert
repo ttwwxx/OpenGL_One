@@ -2,12 +2,12 @@
 #version 330 core   
 layout (location = 2) in vec3 aPos;             
 //layout (location = 3) in vec3 aColor;  
-//layout (location = 4) in vec2 aTexCoord;  
-layout (location = 5) in vec3 aNormal;
+layout (location = 3) in vec3 aNormal;
+layout (location = 4) in vec2 aTexCoords;  //uv
 
 
 //out vec4 vertexColor;   
-//out vec2 TexCoord;
+out vec2 TexCoords;
 out vec3 vertexPos;
 out vec3 worldPos;
 out vec3 Normal;
@@ -24,6 +24,6 @@ void main()
        worldPos = (modelMat * vec4(aPos.xyz, 1.0f)).xyz;
        vertexPos = aPos;
        Normal = mat3(transpose(inverse(modelMat))) * aNormal;
-       //TexCoord = aTexCoord;
+       TexCoords = aTexCoords;
       // vertexColor = vec4(aColor.x , aColor.y  , aColor.z, 1.0); 
 }
