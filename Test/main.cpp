@@ -11,6 +11,8 @@
 #include"Camera.h"
 #include"Light.h"
 #include"LightDirection.h"
+#include"lightPoint.h"
+#include"lightSpot.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -242,10 +244,19 @@ int main()
 #pragma endregion  
 #pragma region Light Declare
     LightDirection lightdirectional = LightDirection(glm::vec3(10.0f, 10.0f, -5.0f), 
-        glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0.0f));
+        glm::vec3(glm::radians(30.0f), glm::radians(30.0f), 0.0f));
 #pragma endregion
-
-
+#pragma region LightPoint Declare
+    lightPoint lightpoint = lightPoint(glm::vec3(5.0f, 5.0f, -5.0f),
+        glm::vec3(glm::radians(30.0f), glm::radians(30.0f), 0.0f),
+        glm::vec3(5.0f, 5.0f, 5.0f)
+    );
+#pragma endregion
+#pragma region lightSpot Declare
+    lightSpot lightspot = lightSpot(glm::vec3(10.0f, 10.0f, 0.0f),
+        glm::vec3(2.0f, 2.0f, 2.0f)
+    );
+#pragma endregion
 // 定义VAO.VBO
     unsigned int VBO;
     unsigned int VAO;
@@ -308,11 +319,22 @@ int main()
             myShader->setMat4("projMat", projMat);
             myShader->setVec3("emission", glm::vec3(1.0f, 0.5f, 0.7f));
             myShader->setVec3("ambientColor", glm::vec3(0.1f, 0.1f, 0.1f));
-            //Light
-            myShader->setVec3("light.Position", lightdirectional.Position);
+            //LightDirectional
+           /* myShader->setVec3("light.Position", lightdirectional.Position);
             myShader->setVec3("light.Color", lightdirectional.Color);
-            myShader->setVec3("light.Direction", lightdirectional.Direction);
-
+            myShader->setVec3("light.Direction", lightdirectional.Direction);*/
+            //LightPoint
+            myShader->setVec3("light.Position", camera.Position);
+            myShader->setVec3("light.Color", lightspot.Color);
+            myShader->setVec3("light.Direction", lightspot.Angles);
+            //点光源设置
+            /*myShader->setFloat("lightpoint.Constant",lightpoint.constant);
+            myShader->setFloat("lightpoint.Linear", lightpoint.linear);
+            myShader->setFloat("lightpoint.Quaratic", lightpoint.quaratic);*/
+            //聚光灯设置
+            myShader->setFloat("lights.cosInnerphy", lightspot.cosInnerphy);
+            myShader->setFloat("lights.cosOutphy", lightspot.cosOutphy);
+            /////
             myShader->setInt("material.diffuse", Shader::DIFFUSE);
             myShader->setInt("material.specular",Shader::SPECULAR);
             myShader->setInt("material.emission",Shader::EMISSION);

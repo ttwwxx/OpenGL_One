@@ -23,10 +23,22 @@ struct Light
 	vec3 Position;
 	vec3 Direction;
 };
-
+struct LightPoint
+{
+//点光源的衰减系数
+	float Constant;
+	float Linear;
+	float Quaratic;
+};
+struct LightSpot
+{
+	float cosInnerphy;
+	float cosOutphy;
+};
 uniform Material material;
 uniform Light light;
-
+uniform LightPoint lightpoint;
+uniform LightSpot lights;
 //uniform vec3 emission;
 uniform vec3 ambientColor;
 //uniform vec3 lightPos;
@@ -37,10 +49,16 @@ uniform vec3 cameraPos;
 out vec4 FragColor;
 void main()
 {
+	vec3 final;
+	float dist = length(light.Position - worldPos);
+	//点光源衰减计算
+	float attenuation = 1.0 / (lightpoint.Constant + lightpoint.Linear * dist + lightpoint.Quaratic * (dist * dist));
 
 	//计算方向
 	vec3 norm = normalize(Normal);
-	vec3 lightDir = normalize(light.Direction);
+	//平行光方向vec3 lightDir = normalize(light.Direction);
+	//点光源方向
+	vec3 lightDir = normalize(light.Position - worldPos);
 	vec3 reflectDir = reflect(-lightDir,norm);
 	vec3 cameraDir = normalize(cameraPos - worldPos);
 
@@ -49,7 +67,7 @@ void main()
 	vec3 color1 = vec3(0.0, 0.0, 1.0); 
 	vec3 color2 = vec3(1.0, 0.0, 0.0); 
 	vec3 color3 = vec3(0.0, 1.0, 0.0); 
-	vec3 specColor = mix(color1, color2,color3) * texture(material.specular, TexCoords).rgb;
+	vec3 specColor =texture(material.specular, TexCoords).rgb;
 
 	vec3 specular = specColor *  spec * light.Color;
 	
@@ -63,6 +81,22 @@ void main()
 	vec3 diffuse = diff * texColor * light.Color;
 	//FragColor = vec4(final,1.0f);
 	//FragColor = vec4(texColor, 1.0f);
-	vec3 final = ambient + diffuse + specular + emission;
+	//聚光灯设置
+	float cosTheta = dot(normalize(worldPos - light.Position), -1 * light.Direction);
+	float spotStrength;
+	if(cosTheta > lights.cosInnerphy)
+	{
+		spotStrength = 1.0f;
+	}
+	else if(cosTheta > lights.cosOutphy)
+	{
+		spotStrength = 1.0 -  (cosTheta - lights.cosInnerphy) / (lights.cosOutphy - lights.cosInnerphy); 
+	}
+	else
+	{
+		spotStrength = 0.0f;
+	}
+		final = ambient + (diffuse + specular) * spotStrength;
+	
 	FragColor = vec4(final, 1.0); // 只显示纹理
 };
