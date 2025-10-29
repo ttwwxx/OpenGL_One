@@ -18,7 +18,8 @@ public:
 	enum Slot
 	{
 		DIFFUSE,
-		SPECULAR
+		SPECULAR,
+		EMISSION
 	};
 
 	//·â×°Location

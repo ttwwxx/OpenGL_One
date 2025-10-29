@@ -1,25 +1,12 @@
 ﻿  Light.cpp
-D:\OpenGL\Test\Test\Light.cpp(6,20): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-D:\OpenGL\Test\Test\Light.cpp(6,20): warning C4244:         with
-D:\OpenGL\Test\Test\Light.cpp(6,20): warning C4244:         [
-D:\OpenGL\Test\Test\Light.cpp(6,20): warning C4244:             T=float
-D:\OpenGL\Test\Test\Light.cpp(6,20): warning C4244:         ]
-D:\OpenGL\Test\Test\Light.cpp(7,20): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-D:\OpenGL\Test\Test\Light.cpp(7,20): warning C4244:         with
-D:\OpenGL\Test\Test\Light.cpp(7,20): warning C4244:         [
-D:\OpenGL\Test\Test\Light.cpp(7,20): warning C4244:             T=float
-D:\OpenGL\Test\Test\Light.cpp(7,20): warning C4244:         ]
-D:\OpenGL\Test\Test\Light.cpp(8,20): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-D:\OpenGL\Test\Test\Light.cpp(8,20): warning C4244:         with
-D:\OpenGL\Test\Test\Light.cpp(8,20): warning C4244:         [
-D:\OpenGL\Test\Test\Light.cpp(8,20): warning C4244:             T=float
-D:\OpenGL\Test\Test\Light.cpp(8,20): warning C4244:         ]
+  Material.cpp
+  Shader.cpp
   main.cpp
-D:\OpenGL\Test\Test\main.cpp(102,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-D:\OpenGL\Test\Test\main.cpp(103,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-D:\OpenGL\Test\Test\main.cpp(107,19): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-D:\OpenGL\Test\Test\main.cpp(108,19): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-D:\OpenGL\Test\Test\main.cpp(110,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-D:\OpenGL\Test\Test\main.cpp(111,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\OpenGL\OpenGL_One\Test\main.cpp(85,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\OpenGL\OpenGL_One\Test\main.cpp(86,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\OpenGL\OpenGL_One\Test\main.cpp(90,19): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\OpenGL\OpenGL_One\Test\main.cpp(91,19): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\OpenGL\OpenGL_One\Test\main.cpp(93,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+D:\OpenGL\OpenGL_One\Test\main.cpp(94,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
   正在生成代码...
-  Test.vcxproj -> D:\OpenGL\Test\Debug\Test.exe
+  Test.vcxproj -> D:\OpenGL\OpenGL_One\Debug\Test.exe

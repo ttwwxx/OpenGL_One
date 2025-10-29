@@ -10,6 +10,7 @@
 #include"Material.h"
 #include"Camera.h"
 #include"Light.h"
+#include"LightDirection.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -228,16 +229,21 @@ int main()
     //开启z-buffer
     glEnable(GL_DEPTH_TEST);
     
-#pragma region Init Shader Program
+#pragma region Shader Declare
     Shader* myShader = new Shader("vertexSource.vert", "fragmentSource.frag");
 #pragma endregion
 #pragma region Init Material
     Material* myMaterial = new Material(myShader,
         LaodImageToGPU("diffuse.png", GL_RGB, GL_RGB, Shader::DIFFUSE),
         LaodImageToGPU("specular.png", GL_RGB, GL_RGB, Shader::SPECULAR),
+        LaodImageToGPU("emission.jpg", GL_RGB, GL_RGB, Shader::EMISSION),
         glm::vec3(1.0f, 1.0f, 1.0f),
         64.0f);
 #pragma endregion  
+#pragma region Light Declare
+    LightDirection lightdirectional = LightDirection(glm::vec3(10.0f, 10.0f, -5.0f), 
+        glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0.0f));
+#pragma endregion
 
 
 // 定义VAO.VBO
@@ -285,6 +291,8 @@ int main()
         glBindTexture(GL_TEXTURE_2D, myMaterial->diffuse);
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, myMaterial->specular);
+        glActiveTexture(GL_TEXTURE0 + 2);
+        glBindTexture(GL_TEXTURE_2D, myMaterial->emission);
         glBindVertexArray(VAO);
         // 使用shader
         myShader->use();
@@ -300,11 +308,14 @@ int main()
             myShader->setMat4("projMat", projMat);
             myShader->setVec3("emission", glm::vec3(1.0f, 0.5f, 0.7f));
             myShader->setVec3("ambientColor", glm::vec3(0.1f, 0.1f, 0.1f));
-            myShader->setVec3("light.Position", myLight.Position);
-            myShader->setVec3("light.Color", myLight.Color);
+            //Light
+            myShader->setVec3("light.Position", lightdirectional.Position);
+            myShader->setVec3("light.Color", lightdirectional.Color);
+            myShader->setVec3("light.Direction", lightdirectional.Direction);
 
             myShader->setInt("material.diffuse", Shader::DIFFUSE);
             myShader->setInt("material.specular",Shader::SPECULAR);
+            myShader->setInt("material.emission",Shader::EMISSION);
            
             myShader->setFloat("material.shininess", myMaterial->shininess);
             myShader->setVec3("cameraPos", camera.Position);
@@ -325,7 +336,7 @@ int main()
  
 
     glfwTerminate(); 
-    return 0;
+    return 0; 
 }
 
 
