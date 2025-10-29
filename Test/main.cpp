@@ -29,6 +29,7 @@ bool firstMouse = true;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::radians(-10.0f), glm::radians(15.0f), glm::vec3(0, 1.0f, 0.0f));
 
 
+
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -91,7 +92,6 @@ void mouse_callback(GLFWwindow* window, double xPos, double yPos)
 
     lastX = xPos;
     lastY = yPos;
-   /* printf("%f\n", deltaX);*/
 
     camera.ProcessMouseMovement(deltaX, deltaY);
 }
@@ -100,18 +100,34 @@ unsigned int LaodImageToGPU(const char *filename, GLint internalFormat, GLenum f
     glGenTextures(1, &TexBuffer);
     glBindTexture(GL_TEXTURE_2D, TexBuffer);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     int width, height, nrChannel;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(filename, &width, &height, &nrChannel, 0);
 
     if (data)
     {
-        glad_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        // 根据通道数自动选择正确的格式
+        GLenum imageFormat = GL_RGB;
+        if (nrChannel == 1)
+            imageFormat = GL_RED;
+        else if (nrChannel == 3)
+            imageFormat = GL_RGB;
+        else if (nrChannel == 4)
+            imageFormat = GL_RGBA;
+
+        // 使用正确的函数！不是glad_glTexImage2D
+        glTexImage2D(GL_TEXTURE_2D, 0, imageFormat, width, height, 0, imageFormat, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
-        printf("load image failed.");
+      printf("load image failed.");
+
     }
     stbi_image_free(data);
     return TexBuffer;
@@ -147,7 +163,7 @@ int main()
     }
     //设置顶点数据：位置，颜色，UV
     float vertices[] = {
-    // positions          // normals           // texture coords
+    // positions         // normals           // texture coords
    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -211,30 +227,31 @@ int main()
     };
     //开启z-buffer
     glEnable(GL_DEPTH_TEST);
+    
 #pragma region Init Shader Program
     Shader* myShader = new Shader("vertexSource.vert", "fragmentSource.frag");
 #pragma endregion
 #pragma region Init Material
     Material* myMaterial = new Material(myShader,
-        LaodImageToGPU("face.png",GL_RGBA, GL_RGBA,0),
-        glm::vec3(1.0f, 1.0f, 1.0f),
+        LaodImageToGPU("diffuse.png", GL_RGB, GL_RGB, Shader::DIFFUSE),
+        LaodImageToGPU("specular.png", GL_RGB, GL_RGB, Shader::SPECULAR),
         glm::vec3(1.0f, 1.0f, 1.0f),
         64.0f);
 #pragma endregion  
 
+
 // 定义VAO.VBO
     unsigned int VBO;
     unsigned int VAO;
-    //unsigned int EBO;
-
-    
+  
     glGenBuffers(1, &VBO);
     glGenVertexArrays(1, &VAO);
 
+    glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindVertexArray(VAO);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -242,92 +259,55 @@ int main()
     glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(4);
 
+    // 解绑
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-
-    /*glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
-
-    ////颜色信息
-    //glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)) );
-    //glEnableVertexAttribArray(3);
-    //UV
-    //Normal
-
-    unsigned int diffuseMap;
-   
-
-
-
-    //实例化相机类
-        //Camera camera (glm::vec3(0.0f, 0.0f, 3.0f) ,glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    
     //计算变换矩阵
         glm::mat4 trans;
-
         glm::mat4 modelMat;
         glm::mat4 viewMat;
         glm::mat4 projMat;
 
         modelMat = glm::rotate(modelMat,  glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         projMat = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-     //viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -3.0f));
-    //trans = glm::scale(trans, glm::vec3(0.5f, 2.0f, 0.2f));
-
-
-    while (!glfwWindowShouldClose(window))
+        while (!glfwWindowShouldClose(window))
     {  
         Light myLight(myShader, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(10.0f, 10.0f, -5.0f));
-        viewMat = camera.GetViewMatrix();
-        //trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-        ////trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));//3. 最后平移到世界位置
-        //trans = glm::rotate(trans, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));//// 2. 然后旋转
-        //trans = glm::scale(trans, glm::vec3(2.5f, 1.0f, 1.0f));//// 1. 首先缩放（在局部空间）
         
+        viewMat = camera.GetViewMatrix();
         processInput(window);
 
-        glClearColor(0.1f, 0.12f, 0.15f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         //清除以前的z-buffer，更新
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      
-        myShader->setInt("material.diffuse", 0);
-
-    
-        // 设置纹理参数
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // 激活纹理单元并绑定纹理
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, myMaterial->diffuse);
+        glActiveTexture(GL_TEXTURE0 + 1);
+        glBindTexture(GL_TEXTURE_2D, myMaterial->specular);
         glBindVertexArray(VAO);
-        /*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);*/
-
-      
-
-
+        // 使用shader
+        myShader->use();
+        
+        // 绘制10个立方体
         for (int i = 0; i < 10; i++)
         {
             glm::mat4 roop_modelMat = glm::mat4(1.0f);
             roop_modelMat = glm::translate(roop_modelMat, cubePositions[i]);
-            myShader->use();
-          
+            
             myShader->setMat4("modelMat",roop_modelMat);
             myShader->setMat4("viewMat", viewMat);
             myShader->setMat4("projMat", projMat);
             myShader->setVec3("emission", glm::vec3(1.0f, 0.5f, 0.7f));
-            myShader->setVec3("ambientColor", glm::vec3(0.2f, 0.1f, 0.0f));
+            myShader->setVec3("ambientColor", glm::vec3(0.1f, 0.1f, 0.1f));
             myShader->setVec3("light.Position", myLight.Position);
             myShader->setVec3("light.Color", myLight.Color);
-            
-            myShader->setVec3("material.specular", myMaterial->specular);
-            myShader->setInt("material.diffuse", myMaterial->diffuse);
+
+            myShader->setInt("material.diffuse", Shader::DIFFUSE);
+            myShader->setInt("material.specular",Shader::SPECULAR);
+           
             myShader->setFloat("material.shininess", myMaterial->shininess);
             myShader->setVec3("cameraPos", camera.Position);
-
-        
-
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
        
@@ -336,6 +316,8 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
         camera.UpdateCameraPosition();
+
+      
     }
     
     glDeleteVertexArrays(1, &VAO);

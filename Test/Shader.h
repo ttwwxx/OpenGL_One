@@ -15,6 +15,12 @@ public:
 	const char* fragmentSource;
 	unsigned int ID;//Shader Program ID
 
+	enum Slot
+	{
+		DIFFUSE,
+		SPECULAR
+	};
+
 	//·â×°Location
 	void setBool(const std::string& name, bool value)const
 	{

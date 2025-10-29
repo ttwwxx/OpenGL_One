@@ -13,7 +13,7 @@ struct Material{
 	//vec3 ambient;
 	//vec3 diffuse;
 	sampler2D diffuse;
-	vec3 specular;
+	sampler2D specular;
 	float shininess;
 };
 struct Light
@@ -44,11 +44,14 @@ void main()
 
 	//specular
 	float spec =pow( max(dot(reflectDir, cameraDir),0), material.shininess);
-	vec3 specular = material.specular * spec * light.Color;
+	vec3 specular = texture(material.specular, TexCoords).rgb * spec * light.Color;
 	//diffuse
-	vec3 diffuse = texture(material.diffuse, TexCoords).rgb;
+	vec3 diffuse = texture(material.diffuse, TexCoords).rgb * light.Color;
 		//ambient环境光
 	vec3 ambient = light.Color * ambientColor ;
 	vec3 final = ambient + diffuse + specular;
-	FragColor = vec4(final,1.0f);
+	vec3 texColor = texture(material.diffuse, TexCoords).rgb;
+	//FragColor = vec4(final,1.0f);
+	//FragColor = vec4(texColor, 1.0f);
+	FragColor = vec4(final, 1.0); // 只显示纹理
 };
