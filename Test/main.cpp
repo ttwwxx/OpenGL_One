@@ -228,6 +228,13 @@ int main()
         glm::vec3(1.5f,  0.2f, -1.5f),
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
+    // positions of the point lights
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(0.0f,  0.2f,  0.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3(0.0f,  0.0f, -3.0f)
+    };
     //开启z-buffer
     glEnable(GL_DEPTH_TEST);
     
@@ -239,19 +246,41 @@ int main()
     Material* myMaterial = new Material(myShader,
         LaodImageToGPU("diffuse.png", GL_RGB, GL_RGB, Shader::DIFFUSE),
         LaodImageToGPU("specular.png", GL_RGB, GL_RGB, Shader::SPECULAR),
-        64.0f);
+        32.0f);
 #pragma endregion  
 #pragma region Light Declare
-    LightDirection lightdirectional = LightDirection( glm::vec3(-0.2f, -1.0f, -1.0f),
+    LightDirection lightdirectional = LightDirection(
         glm::vec3(0.05f, 0.05f, 0.05f),
-       glm::vec3(1.0f, 1.0f, 1.0f),
-        glm::vec3(1.0f, 1.0f, 1.0f));
+        glm::vec3(0.5f, 0.5f, 0.5f),
+        glm::vec3(-0.2f, -1.0f, -0.3f),
+        glm::vec3(0.4f, 0.4f, 0.4f));
 #pragma endregion
 #pragma region LightPoint Declare
-    lightPoint lightpoint = lightPoint(glm::vec3(5.0f, 5.0f, -5.0f),
-        glm::vec3(glm::radians(30.0f), glm::radians(30.0f), 0.0f),
-        glm::vec3(5.0f, 5.0f, 5.0f)
+    lightPoint lightpoint0 = lightPoint(
+        pointLightPositions[0],
+        glm::vec3(0.05f,0.05f,0.05f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 0.0f, 0.8f)
     );
+    lightPoint lightpoint1 = lightPoint(
+        pointLightPositions[1],
+        glm::vec3(0.05f, 0.05f, 0.05f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.8f, 0.0f, 0.0f)
+    );
+    lightPoint lightpoint2 = lightPoint(
+        pointLightPositions[2],
+        glm::vec3(0.05f, 0.05f, 0.05f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 0.8f, 0.0f)
+    );
+    lightPoint lightpoint3 = lightPoint(
+        pointLightPositions[3],
+        glm::vec3(0.05f, 0.05f, 0.05f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.8f, 0.8f, 0.8f)
+    );
+    //glm::vec3 position, glm::vec3 ambient, glm::vec3 specular, glm::vec3 diffuse
 #pragma endregion
 #pragma region lightSpot Declare
     lightSpot lightspot = lightSpot(glm::vec3(10.0f, 10.0f, 0.0f),
@@ -339,14 +368,39 @@ if (!printed) {
             myShader->setVec3("lightd.ambient", lightdirectional.Ambient);
             myShader->setVec3("lightd.diffuse", lightdirectional.Diffuse);
             myShader->setVec3("lightd.specular", lightdirectional.Specular);
-            //LightPoint
-            myShader->setVec3("light.Position", camera.Position);
-            myShader->setVec3("light.Color", lightspot.Color);
-            myShader->setVec3("light.Direction", lightspot.Angles);
-            //点光源设置
-            /*myShader->setFloat("lightpoint.Constant",lightpoint.constant);
-            myShader->setFloat("lightpoint.Linear", lightpoint.linear);
-            myShader->setFloat("lightpoint.Quaratic", lightpoint.quaratic);*/
+ // point light
+            //pointlight0
+            myShader->setVec3("lightps[0].position", lightpoint0.position);
+            myShader->setVec3("lightps[0].ambient", lightpoint0.diffuse);
+            myShader->setVec3("lightps[0].diffuse", lightpoint0.diffuse);
+            myShader->setVec3("lightps[0].specular", lightpoint0.specular);
+            myShader->setFloat("lightps[0].constant", lightpoint0.constant);
+            myShader->setFloat("lightps[0].linear", lightpoint0.linear);
+            myShader->setFloat("lightps[0].quadratic", lightpoint0.quaratic);
+            //pointlight1
+            myShader->setVec3("lightps[1].position", lightpoint1.position);
+            myShader->setVec3("lightps[1].ambient", lightpoint1.diffuse);
+            myShader->setVec3("lightps[1].diffuse", lightpoint1.diffuse);
+            myShader->setVec3("lightps[1].specular", lightpoint1.specular);
+            myShader->setFloat("lightps[1].constant", lightpoint1.constant);
+            myShader->setFloat("lightps[1].linear", lightpoint1.linear);
+            myShader->setFloat("lightps[1].quadratic", lightpoint1.quaratic);
+            //pointlight2
+            myShader->setVec3("lightps[2].position", lightpoint2.position);
+            myShader->setVec3("lightps[2].ambient", lightpoint2.diffuse);
+            myShader->setVec3("lightps[2].diffuse", lightpoint2.diffuse);
+            myShader->setVec3("lightps[2].specular", lightpoint2.specular);
+            myShader->setFloat("lightps[2].constant", lightpoint2.constant);
+            myShader->setFloat("lightps[2].linear", lightpoint2.linear);
+            myShader->setFloat("lightps[2].quadratic", lightpoint2.quaratic);
+            //pointlight3
+            myShader->setVec3("lightps[3].position", lightpoint3.position);
+            myShader->setVec3("lightps[3].ambient", lightpoint3.diffuse);
+            myShader->setVec3("lightps[3].diffuse", lightpoint3.diffuse);
+            myShader->setVec3("lightps[3].specular", lightpoint3.specular);
+            myShader->setFloat("lightps[3].constant", lightpoint3.constant);
+            myShader->setFloat("lightps[3].linear", lightpoint3.linear);
+            myShader->setFloat("lightps[3].quadratic", lightpoint3.quaratic);
             //聚光灯设置
             myShader->setFloat("lights.cosInnerphy", lightspot.cosInnerphy);
             myShader->setFloat("lights.cosOutphy", lightspot.cosOutphy);

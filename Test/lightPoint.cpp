@@ -1,9 +1,10 @@
 #include "lightPoint.h"
 
-lightPoint::lightPoint(glm::vec3 position,glm::vec3 angels ,glm::vec3 color) :
-	Position(position),
-	Color(color),
-	Angels(angels)
+lightPoint::lightPoint(glm::vec3 position, glm::vec3 ambient, glm::vec3 specular, glm::vec3 diffuse) :
+	position(position),
+	ambient(ambient),
+	specular(specular),
+	diffuse(diffuse)
 {
 
 	constant = 1.0f;
