@@ -11,15 +11,14 @@ public:
 
 	std::string vertexString;
 	std::string fragmentString;
-	const char* vertexSource;
 	const char* fragmentSource;
+	const char* vertexSource;
 	unsigned int ID;//Shader Program ID
 
 	enum Slot
 	{
 		DIFFUSE,
-		SPECULAR,
-		EMISSION
+		SPECULAR
 	};
 
 	//·â×°Location

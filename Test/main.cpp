@@ -232,19 +232,20 @@ int main()
     glEnable(GL_DEPTH_TEST);
     
 #pragma region Shader Declare
-    Shader* myShader = new Shader("vertexSource.vert", "fragmentSource.frag");
+    Shader* myShader = new Shader("multiple_lightvs.vert", "multiple_lightfs.frag");
 #pragma endregion
 #pragma region Init Material
+    //Shader* myShader,unsigned int myDiffuse, unsigned int mySpecular, float myShininess
     Material* myMaterial = new Material(myShader,
         LaodImageToGPU("diffuse.png", GL_RGB, GL_RGB, Shader::DIFFUSE),
         LaodImageToGPU("specular.png", GL_RGB, GL_RGB, Shader::SPECULAR),
-        LaodImageToGPU("emission.jpg", GL_RGB, GL_RGB, Shader::EMISSION),
-        glm::vec3(1.0f, 1.0f, 1.0f),
         64.0f);
 #pragma endregion  
 #pragma region Light Declare
-    LightDirection lightdirectional = LightDirection(glm::vec3(10.0f, 10.0f, -5.0f), 
-        glm::vec3(glm::radians(30.0f), glm::radians(30.0f), 0.0f));
+    LightDirection lightdirectional = LightDirection( glm::vec3(-0.2f, -1.0f, -1.0f),
+        glm::vec3(0.05f, 0.05f, 0.05f),
+       glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(1.0f, 1.0f, 1.0f));
 #pragma endregion
 #pragma region LightPoint Declare
     lightPoint lightpoint = lightPoint(glm::vec3(5.0f, 5.0f, -5.0f),
@@ -269,12 +270,12 @@ int main()
     
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(4);
 
     // 解绑
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -302,12 +303,23 @@ int main()
         glBindTexture(GL_TEXTURE_2D, myMaterial->diffuse);
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, myMaterial->specular);
-        glActiveTexture(GL_TEXTURE0 + 2);
-        glBindTexture(GL_TEXTURE_2D, myMaterial->emission);
         glBindVertexArray(VAO);
         // 使用shader
         myShader->use();
-        
+        static bool printed = false;
+if (!printed) {
+    std::cout << "Diffuse texture ID: " << myMaterial->diffuse << std::endl;
+    std::cout << "Specular texture ID: " << myMaterial->specular << std::endl;
+    std::cout << "Light direction: " 
+              << lightdirectional.Direction.x << ", "
+              << lightdirectional.Direction.y << ", "
+              << lightdirectional.Direction.z << std::endl;
+    std::cout << "Light diffuse: "
+              << lightdirectional.Diffuse.x << ", "
+              << lightdirectional.Diffuse.y << ", "
+              << lightdirectional.Diffuse.z << std::endl;
+    printed = true;
+}
         // 绘制10个立方体
         for (int i = 0; i < 10; i++)
         {
@@ -317,12 +329,16 @@ int main()
             myShader->setMat4("modelMat",roop_modelMat);
             myShader->setMat4("viewMat", viewMat);
             myShader->setMat4("projMat", projMat);
-            myShader->setVec3("emission", glm::vec3(1.0f, 0.5f, 0.7f));
             myShader->setVec3("ambientColor", glm::vec3(0.1f, 0.1f, 0.1f));
+            //Material设置
+            myShader->setInt("material.diffuse", Shader::DIFFUSE);
+            myShader->setInt("material.specular", Shader::SPECULAR);
+            myShader->setFloat("material.shininess", myMaterial->shininess);
             //LightDirectional
-           /* myShader->setVec3("light.Position", lightdirectional.Position);
-            myShader->setVec3("light.Color", lightdirectional.Color);
-            myShader->setVec3("light.Direction", lightdirectional.Direction);*/
+            myShader->setVec3("lightd.direction", lightdirectional.Direction);
+            myShader->setVec3("lightd.ambient", lightdirectional.Ambient);
+            myShader->setVec3("lightd.diffuse", lightdirectional.Diffuse);
+            myShader->setVec3("lightd.specular", lightdirectional.Specular);
             //LightPoint
             myShader->setVec3("light.Position", camera.Position);
             myShader->setVec3("light.Color", lightspot.Color);
@@ -334,14 +350,11 @@ int main()
             //聚光灯设置
             myShader->setFloat("lights.cosInnerphy", lightspot.cosInnerphy);
             myShader->setFloat("lights.cosOutphy", lightspot.cosOutphy);
-            /////
-            myShader->setInt("material.diffuse", Shader::DIFFUSE);
-            myShader->setInt("material.specular",Shader::SPECULAR);
-            myShader->setInt("material.emission",Shader::EMISSION);
+      
            
-            myShader->setFloat("material.shininess", myMaterial->shininess);
             myShader->setVec3("cameraPos", camera.Position);
             glDrawArrays(GL_TRIANGLES, 0, 36);
+      
         }
        
       /*  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/

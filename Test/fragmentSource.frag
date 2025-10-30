@@ -17,6 +17,7 @@ struct Material{
 	sampler2D emission;
 	float shininess;
 };
+
 struct Light
 {
 	vec3 Color;
@@ -44,7 +45,6 @@ uniform vec3 ambientColor;
 //uniform vec3 lightPos;
 //uniform vec3 lightColor;
 uniform vec3 cameraPos;
-
 
 out vec4 FragColor;
 void main()
