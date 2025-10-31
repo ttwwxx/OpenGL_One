@@ -252,7 +252,7 @@ int main()
     LightDirection lightdirectional = LightDirection(
         glm::vec3(0.05f, 0.05f, 0.05f),
         glm::vec3(0.5f, 0.5f, 0.5f),
-        glm::vec3(-0.2f, -1.0f, -0.3f),
+        glm::vec3(10.0f, 10.0f, 5.0f),
         glm::vec3(0.4f, 0.4f, 0.4f));
 #pragma endregion
 #pragma region LightPoint Declare
@@ -280,11 +280,13 @@ int main()
         glm::vec3(1.0f, 1.0f, 1.0f),
         glm::vec3(0.8f, 0.8f, 0.8f)
     );
-    //glm::vec3 position, glm::vec3 ambient, glm::vec3 specular, glm::vec3 diffuse
 #pragma endregion
+    //glm::vec3 position, glm::vec3 angels, glm::vec3 diffuse, glm::vec3 ambient
 #pragma region lightSpot Declare
-    lightSpot lightspot = lightSpot(glm::vec3(10.0f, 10.0f, 0.0f),
-        glm::vec3(2.0f, 2.0f, 2.0f)
+    lightSpot lightspot = lightSpot(glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z),
+        glm::vec3(2.0f, 2.0f, 2.0f), 
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f)
     );
 #pragma endregion
 // 定义VAO.VBO
@@ -324,7 +326,7 @@ int main()
         viewMat = camera.GetViewMatrix();
         processInput(window);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.75f, 0.52f, 0.3f, 1.0f);
         //清除以前的z-buffer，更新
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // 激活纹理单元并绑定纹理
@@ -402,6 +404,11 @@ if (!printed) {
             myShader->setFloat("lightps[3].linear", lightpoint3.linear);
             myShader->setFloat("lightps[3].quadratic", lightpoint3.quaratic);
             //聚光灯设置
+            myShader->setVec3("lights.position", lightspot.Position);
+            myShader->setVec3("lights.ambient", lightspot.Ambient);
+            myShader->setVec3("lights.diffuse", lightspot.Diffuse);
+            myShader->setVec3("lights.angles", lightspot.Angles);
+
             myShader->setFloat("lights.cosInnerphy", lightspot.cosInnerphy);
             myShader->setFloat("lights.cosOutphy", lightspot.cosOutphy);
       

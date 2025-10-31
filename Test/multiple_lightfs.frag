@@ -30,15 +30,30 @@ struct LightPoint
 	float linear;
 	float quadratic;
 };
+//聚光灯
+struct LightSpot
+{
+	vec3 position;
+	vec3 angels;
+	vec3 diffuse;
+	vec3 direction;
+	vec3 ambient;
+
+	float cosInnerphy;
+	float cosOutphy ;
+	
+};
 #define NR_POINT_LIGHTS 4
 uniform LightPoint lightps[NR_POINT_LIGHTS];
 uniform LightDiractional lightd;
+uniform LightSpot lights;
 
 uniform Material material;
 uniform vec3 cameraPos;
 
 vec3 CaculateLightDiractional(LightDiractional lightd, vec3 normal, vec3 viewDir);
 vec3 CaculateLightPoint(LightPoint lightp, vec3 normal, vec3 fragPos,vec3 viewDir);
+vec3 CaculateLightSpot(LightSpot lights, vec3 normal, vec3 fragPos,vec3 viewDir);
 
 void main()
 {
@@ -51,7 +66,11 @@ void main()
 	for(int i = 0; i< NR_POINT_LIGHTS; i++){
 		finalLP += CaculateLightPoint(lightps[i], normal,FragPos,viewDir);
 	}
-	vec3 final = finalLD + finalLP;
+	//聚光灯计算
+	vec3 finalLS = CaculateLightSpot(lights,FragPos, normal, viewDir);
+	//
+	vec3 final = finalLD + finalLP + finalLS;
+
 	FragColor = vec4(final,1.0);
 	 // FragColor = texture(material.diffuse, TexCoords);  
 	
@@ -70,7 +89,7 @@ vec3 CaculateLightDiractional(LightDiractional lightd, vec3 normal, vec3 viewDir
 	//最终颜色计算
 	vec3 ambient = lightd.ambient * vec3(texture(material.diffuse, TexCoords));
 	vec3 diffuse = diff * vec3(texture(material.diffuse, TexCoords)) * lightd.diffuse;
-	vec3 specular = spec * specStrength * lightd.diffuse * 0.5f;
+	vec3 specular = spec * specStrength * lightd.diffuse * 0.05f;
 	vec3 final;
 	final = diffuse + ambient + specular;
 	
@@ -97,4 +116,36 @@ vec3 CaculateLightPoint(LightPoint lightp, vec3 normal, vec3 fragPos,vec3 viewDi
     specular *= attenuation;
 	vec3 final = ambient + diffuse + specular;
 	return final;
+}
+vec3 CaculateLightSpot(LightSpot lights, vec3 normal, vec3 fragPos,vec3 viewDir)
+{
+	float LightS;
+	vec3 distance = normalize(lights.position - fragPos);
+	float cosTheta = dot (distance , -1.0 * lights.direction);
+	if(cosTheta  < lights.cosInnerphy)
+	{
+		LightS = 1.0f;
+	}
+	else if(cosTheta > lights.cosOutphy)
+	{
+		LightS = 0.0f;
+	}
+	else
+	{
+		LightS = 1.0 -  (cosTheta - lights.cosInnerphy) / (lights.cosOutphy - lights.cosInnerphy); 
+	}
+	// 漫反射着色
+    float diff = max(dot(normal, lights.direction), 0.0);
+	vec3 diffuse = diff  * vec3(texture(material.diffuse, TexCoords)) * LightS; 
+	//高光
+	vec3 reflecDir = reflect(-lights.direction,normal);
+	float spec = pow(max(dot(viewDir , reflecDir) , 0.0), material.shininess);
+	vec3 specular = spec * LightS * vec3(texture(material.specular, TexCoords));
+	//环境光
+	vec3 ambient = lights.ambient * vec3(texture(material.specular, TexCoords));
+	vec3 final = ambient + diffuse + specular;
+	return final;
+
+
+
 }

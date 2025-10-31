@@ -1,9 +1,9 @@
 #include "lightSpot.h"
 
-lightSpot::lightSpot(glm::vec3 position, glm::vec3 angels, glm::vec3 color):
+lightSpot::lightSpot(glm::vec3 position, glm::vec3 angels, glm::vec3 diffuse, glm::vec3 ambient):
 		Position(position),
 		Angles(angels),
-		Color(color)
+		Diffuse(diffuse)
 {
 	UpdateDirection();
 }
